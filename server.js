@@ -1,6 +1,5 @@
 const express = require('express');
 const cors = require('cors');
-const nodemailer = require('nodemailer');
 const fs = require('fs').promises;
 const path = require('path');
 
@@ -12,14 +11,25 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
-// Email configuration
-const transporter = nodemailer.createTransporter({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER, // uttamkumar95446@gmail.com
-        pass: process.env.EMAIL_PASS  // glatcxakwcjnvltl
+// Email configuration - Only initialize if credentials are provided
+let transporter = null;
+try {
+    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+        const nodemailer = require('nodemailer');
+        transporter = nodemailer.createTransporter({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
+            }
+        });
+        console.log('✅ Email notification system initialized');
+    } else {
+        console.log('⚠️  Email credentials not configured - Email notifications disabled');
     }
-});
+} catch (error) {
+    console.log('⚠️  Email system not available:', error.message);
+}
 
 // File to store registrations
 const REGISTRATIONS_FILE = path.join(__dirname, 'registrations.json');
@@ -44,19 +54,6 @@ async function readRegistrations() {
     }
 }
 
-// Add basic auth in server.js
-   app.use('/admin.html', (req, res, next) => {
-       const auth = {login: 'admin', password: 'your-secure-password'};
-       const b64auth = (req.headers.authorization || '').split(' ')[1] || '';
-       const [login, password] = Buffer.from(b64auth, 'base64').toString().split(':');
-       if (login && password && login === auth.login && password === auth.password) {
-           return next();
-       }
-       res.set('WWW-Authenticate', 'Basic realm="401"');
-       res.status(401).send('Authentication required.');
-   });
-
-
 // Write registrations to file
 async function writeRegistrations(registrations) {
     try {
@@ -68,9 +65,9 @@ async function writeRegistrations(registrations) {
 
 // Send email notification
 async function sendEmailNotification(registration) {
-    // Skip if email credentials not configured
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-        console.log('Email credentials not configured. Skipping email notification.');
+    // Skip if email not configured
+    if (!transporter) {
+        console.log('📧 Email notification skipped (not configured)');
         return;
     }
 
@@ -89,7 +86,7 @@ async function sendEmailNotification(registration) {
                     
                     <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
                         <tr style="border-bottom: 1px solid #eee;">
-                            <td style="padding: 12px 0; color: #666; font-weight: 600;">👤 Employee ID:</td>
+                            <td style="padding: 12px 0; color: #666; font-weight: 600;">👤 Username:</td>
                             <td style="padding: 12px 0; color: #333;"><strong>${registration.employeeId}</strong></td>
                         </tr>
                         <tr style="border-bottom: 1px solid #eee;">
@@ -135,9 +132,9 @@ async function sendEmailNotification(registration) {
 
     try {
         await transporter.sendMail(mailOptions);
-        console.log('Email notification sent successfully');
+        console.log('✅ Email notification sent successfully');
     } catch (error) {
-        console.error('Error sending email:', error.message);
+        console.error('❌ Error sending email:', error.message);
     }
 }
 
@@ -320,17 +317,26 @@ async function startServer() {
     try {
         await initializeRegistrationsFile();
         app.listen(PORT, () => {
+            const emailStatus = transporter ? '✅ Configured' : '❌ Not configured';
             console.log(`
 ╔════════════════════════════════════════════════╗
 ║   🚀 Worker Registration Server Started        ║
 ║                                                ║
-║   📍 Server: http://localhost:${PORT}          ║
-║   🌐 Environment: ${process.env.NODE_ENV || 'development'}              ║
-║   📧 Email: ${process.env.EMAIL_USER ? '✅ Configured' : '❌ Not configured'}          ║
+║   📍 Server: http://localhost:${PORT.toString().padEnd(23)}║
+║   🌐 Environment: ${(process.env.NODE_ENV || 'development').padEnd(30)}║
+║   📧 Email: ${emailStatus.padEnd(33)}║
 ║                                                ║
 ║   Press Ctrl+C to stop                         ║
 ╚════════════════════════════════════════════════╝
             `);
+            
+            if (!transporter) {
+                console.log('\n⚠️  Email notifications are disabled');
+                console.log('   To enable, set these environment variables:');
+                console.log('   - EMAIL_USER (your Gmail address)');
+                console.log('   - EMAIL_PASS (your Gmail App Password)');
+                console.log('   - ADMIN_EMAIL (where to receive notifications)\n');
+            }
         });
     } catch (error) {
         console.error('Failed to start server:', error);
